@@ -1,18 +1,27 @@
 import Book from "../models/Book.js";
-import app from "../app.js";
 
 class BooksController{
     static findAll = async (req, res) => {
-        const list = await Book.find({})
+        const list = await Book.find({}).populate("author").exec()
         res.json(list)
     }
     static findById = async (req, res) => {
         const {id} = req.params;
         try{
-            const book = await Book.findById(id).exec()
+            const book = await Book.findById(id).populate("author").exec()
             res.json(book)
         }catch (e){
-            res.status(404).send({message: `Cant find book with id: ${id}`})
+            res.status(404).send({message: `${e.message} - Cant find book with id: ${id}`})
+        }
+    }
+
+    static findByEditor = async (req, res) => {
+        const {editor} = req.query;
+        try {
+            const books = await Book.find({editor: editor}).populate("author").exec();
+            res.json(books)
+        }catch (e) {
+            res.status(500).send({message: `${e.message} - Cant find book with editor: ${editor}`})
         }
     }
 
